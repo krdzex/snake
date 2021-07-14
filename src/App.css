@@ -71,3 +71,15 @@ body {
   box-shadow: 0 0 7px 3px rgb(0 0 0 / 40%);
   cursor: pointer;
 }
+
+.score {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.snake {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
