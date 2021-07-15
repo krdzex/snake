@@ -29,8 +29,8 @@ const Board = (props) => {
     const col = props.col;
     const [grid, setGrid] = useState([])
 
-    //Because i wanted to do this project with linked list i created class for singletail
-    class LinkedListtail {
+    //Because i wanted to do this project with linked list i created class for single node
+    class LinkedListNode {
         constructor(value) {
             this.value = value;
             this.next = null;
@@ -40,20 +40,19 @@ const Board = (props) => {
     //Class for our LinkedList
     class LinkedList {
         constructor(value) {
-            const tail = new LinkedListtail(value);
+            const tail = new LinkedListNode(value);
             this.head = tail;
             this.tail = tail;
         }
     }
 
     const [score, setScore] = useState(0);
-    const [food, setFood] = useState(48)
-    const [snake, setSnake] = useState(new LinkedList({ row: 5, col: 4, value: 55 }))
-    const [snakeCells, setSnakeCells] = useState(new Set([55]))
+    const [food, setFood] = useState(190)
+    const [snake, setSnake] = useState(new LinkedList({ row: 8, col: 5, value: 150 }))
+    const [snakeCells, setSnakeCells] = useState(new Set([150]))
     const [direction, setDirection] = useState("ArrowRight")
     const [speed, setSpeed] = useState(800);
     const [gameOver, setGameOver] = useState(false)
-
     //Creating board with unique value for each cell
     const createBoard = useCallback(() => {
         let board = []
@@ -85,7 +84,7 @@ const Board = (props) => {
         const nextHeadValue = getNextHeadValue(currentHeadCoordinates, direction)
 
         //If our head hit wall we want to return function and do nothing
-        if (nextHeadValue.col > 9 || nextHeadValue.col < 0 || nextHeadValue.row > 9 || nextHeadValue.row < 0) {
+        if (nextHeadValue.col > col - 1 || nextHeadValue.col < 0 || nextHeadValue.row > row - 1 || nextHeadValue.row < 0) {
             if (localStorage.getItem("highScore") < score) {
                 localStorage.setItem("highScore", JSON.stringify(score));
             }
@@ -103,7 +102,7 @@ const Board = (props) => {
             return setGameOver(true);
         }
         //So now when we have coodinates and value we create new tail with that parameters
-        const newHead = new LinkedListtail({ row: nextHeadValue.row, col: nextHeadValue.col, value: newHeadValue });
+        const newHead = new LinkedListNode({ row: nextHeadValue.row, col: nextHeadValue.col, value: newHeadValue });
 
         //So now we need to save value of our current head and that will be snake.head
         //After we saved that value, we change our snake.head to newHead because that will be our new head tail
@@ -164,26 +163,26 @@ const Board = (props) => {
     //If our snake ate food we need new food squere and we do it with random
     // If our new food cell is on snake cell or we have new food cell same as previouse food cell we just call function again to get new new random
     const eatFood = () => {
-        let nextFood = Math.floor(Math.random() * (100 - 1 + 1) + 1);
+        let nextFood = Math.floor(Math.random() * (324 - 1 + 1) + 1);
         if (snakeCells.has(nextFood) || nextFood === food) {
             eatFood();
         } else {
             setFood(nextFood)
         }
     }
-    //This function little bit complex. In this function we add new cell on our snake body
+    //This function is little bit complex. In this function we add new cell on our snake body
     //First we made function to decide where to put our new piece and we pass snake.tail and direction because snake.tail is our last cell on snake body
     //We will explain that function completly later
     //After we get our coodinates we do almost same thing just like for new head
     const addingOnSnake = (direction, snakeCells) => {
         const positionOfnewPiece = getNewPiecePosition(snake.tail, direction)
-        if (positionOfnewPiece.col > 9 || positionOfnewPiece.col < 0 || positionOfnewPiece.row > 9 || positionOfnewPiece.row < 0) {
+        if (positionOfnewPiece.col > 19 || positionOfnewPiece.col < 0 || positionOfnewPiece.row > 19 || positionOfnewPiece.row < 0) {
             return
         }
         //We get our new cell value from our coordinates
         const newTailCellValue = grid[positionOfnewPiece.row][positionOfnewPiece.col]
         //New we make new tail from coordinates we got and new tail cell value
-        const newTail = new LinkedListtail({ row: positionOfnewPiece.row, col: positionOfnewPiece.col, value: newTailCellValue });
+        const newTail = new LinkedListNode({ row: positionOfnewPiece.row, col: positionOfnewPiece.col, value: newTailCellValue });
 
         // So now we save our current snake.tail
         const currentTail = snake.tail;
@@ -260,7 +259,18 @@ const Board = (props) => {
     //Function that change direction on key down
     const onKeyDownHandle = (e) => {
         if (/ArrowLeft|ArrowRight|ArrowUp|ArrowDown/.test(e.key)) {
-            setDirection(e.key)
+            if (snakeCells.size === 1) {
+                return setDirection(e.key)
+            }
+            if (direction === "ArrowRight" && snakeCells.size > 1 && e.key !== "ArrowLeft") {
+                return setDirection(e.key)
+            } else if (direction === "ArrowLeft" && snakeCells.size > 1 && e.key !== "ArrowRight") {
+                return setDirection(e.key)
+            } else if (direction === "ArrowUp" && snakeCells.size > 1 && e.key !== "ArrowDown") {
+                return setDirection(e.key)
+            } else if (direction === "ArrowDown" && snakeCells.size > 1 && e.key !== "ArrowUp") {
+                return setDirection(e.key)
+            }
         }
     }
     //We set interval
@@ -277,19 +287,19 @@ const Board = (props) => {
     const playAgain = () => {
         setGameOver(false);
         setScore(0);
-        setSnake(new LinkedList({ row: 5, col: 4, value: 55 }))
-        setSnakeCells(new Set([55]))
+        setSnake(new LinkedList({ row: 8, col: 5, value: 150 }))
+        setSnakeCells(new Set([150]))
         setDirection("ArrowRight");
         setFood(48)
     }
 
-    window.onload = function () {
+    window.onbeforeunload = function () {
         localStorage.removeItem("highScore");
     }
     return (
         <div onKeyDown={onKeyDownHandle} tabIndex="0" className="wholeBoard">
             <GameHeader score={score} gameOver={gameOver} playAgain={playAgain} />
-            <div className="board">
+            <div className={gameOver ? "gameOverBoard" : "board"}>
                 {grid.map((oneRow) => (
                     oneRow.map((singleCell, id) => (
                         <Cell info={singleCell} key={id} snakeCells={snakeCells} foodCell={food} />
